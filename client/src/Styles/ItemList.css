@@ -1,0 +1,16 @@
+.list-item {
+    display: flex; /* Flex layout */
+    align-items: center; /* Align items vertically */
+    margin-bottom: 10px;
+}
+
+.list-item label {
+    flex: 1; /* Make label take up most space */
+    margin-right: 10px;
+}
+
+.list-item input[type="checkbox"] {
+    width: 20px; /* Checkbox size */
+    height: 20px; /* Checkbox size */
+    margin-right: 10px;
+}

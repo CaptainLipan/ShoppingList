@@ -1,13 +1,13 @@
 import { useContext } from "react";
 import { DetailContext } from "./DetailProvider";
 import Item from "./Item";
-
+import  "../Styles/ItemList.css";
 function ItemList() {
   const { data, handlerMap, showResolved, toggleShowResolved } =
     useContext(DetailContext);
 
   return (
-    <div style={{ border: "1px solid grey", margin: "8px", padding: "8px" }}>
+    <div >
       ItemList <button onClick={() => handlerMap.addItem()}>add item</button>
       <button onClick={() => toggleShowResolved()}>
         {showResolved ? "not resolved only" : "all items"}

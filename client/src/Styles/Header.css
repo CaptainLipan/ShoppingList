@@ -1,0 +1,23 @@
+.navbar {
+    background: linear-gradient(90deg, #F4937A, #F05077); /* Gradient from pink to red */
+    padding: 1rem;
+    color: white; /* Ensures text is visible on the gradient */
+}
+
+.navbar .btn-danger {
+    background-color: #ff4d4d; /* Matches the red tone in the gradient */
+    border-color: #ff4d4d;
+}
+
+.profile-icon {
+    background: none;
+    border: none;
+    color: white;
+    cursor: pointer;
+    position: relative;
+}
+
+.dropdown-menu {
+    background-color: white;
+    color: #333;
+}
