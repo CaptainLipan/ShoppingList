@@ -87,15 +87,13 @@ function DetailProvider({ children }) {
           return { ...current };
         });
       },
-      removeMember: ({ memberId }) => {
-        setData((current) => {
-          const memberIndex = current.memberList.findIndex(
-            (item) => item === memberId
-          );
-          if (memberIndex > -1) current.memberList.splice(memberIndex, 1);
-          return { ...current };
-        });
+      removeMember: (memberId) => {
+        setData((prevData) => ({
+          ...prevData,
+          memberList: prevData.memberList.filter((id) => id !== memberId),
+        }));
       },
+
     },
     showResolved,
     toggleShowResolved: () => setShowResolved((current) => !current),
