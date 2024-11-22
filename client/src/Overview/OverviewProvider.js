@@ -1,9 +1,8 @@
 import { useMemo, useState, useContext } from "react";
 
 import { UserContext } from "../Users/UserProvider.js";
-
 import Header from "./Header.js";
-import ToDoListOverviewList from "./OverviewList.js";
+import OverviewList from "./OverviewList.js";
 import Toolbar from "./Toolbar.js";
 
 function OverviewProvider() {
@@ -34,72 +33,70 @@ function OverviewProvider() {
     },
     {
       id: "td04",
-      name: "čtvrtý úkolovník",
+      name: "Čtvrtý úkolovník",
       state: "archived",
       owner: "u2",
       memberList: ["u1"],
     },
   ]);
 
-  function handleCreate() {
-    setToDoListOverviewList((current) => {
-      current.push({
-        id: Math.random(),
-        name: "Nový úkol",
+  // Function to create a new list
+  function handleCreate(name) {
+    setToDoListOverviewList((current) => [
+      ...current,
+      {
+        id: `td${Math.random().toString(36).substr(2, 9)}`, // Unique ID
+        name,
         state: "active",
         owner: loggedInUser,
         memberList: [],
-      });
-      return current.slice();
-    });
+      },
+    ]);
   }
 
+  // Function to archive a list
   function handleArchive(dtoIn) {
-    setToDoListOverviewList((current) => {
-      const itemIndex = current.findIndex((item) => item.id === dtoIn.id);
-      current[itemIndex] = { ...current[itemIndex], state: "archived" };
-      return current.slice();
-    });
+    setToDoListOverviewList((current) =>
+        current.map((item) =>
+            item.id === dtoIn.id ? { ...item, state: "archived" } : item
+        )
+    );
   }
 
+  // Function to delete a list
   function handleDelete(dtoIn) {
-    setToDoListOverviewList((current) => {
-      const itemIndex = current.findIndex((item) => item.id === dtoIn.id);
-      current.splice(itemIndex, 1);
-      return current.slice();
-    });
+    setToDoListOverviewList((current) =>
+        current.filter((item) => item.id !== dtoIn.id)
+    );
   }
 
+  // Filtered lists based on the archived state and logged-in user
   const filteredToDoListList = useMemo(() => {
-    if (showArchived) {
-      return toDoListOverviewList.filter(
-        (item) =>
-          item.owner === loggedInUser || item.memberList?.includes(loggedInUser)
-      );
-    } else {
-      return toDoListOverviewList.filter(
-        (item) =>
-          item.state === "active" &&
-          (item.owner === loggedInUser ||
-            item.memberList?.includes(loggedInUser))
-      );
-    }
+    return toDoListOverviewList.filter((item) => {
+      const isOwnedOrMember =
+          item.owner === loggedInUser || item.memberList.includes(loggedInUser);
+
+      if (showArchived) {
+        return isOwnedOrMember;
+      }
+      return isOwnedOrMember && item.state === "active";
+    });
   }, [showArchived, toDoListOverviewList, loggedInUser]);
 
   return (
-    <>
-      <Header />
-      <Toolbar
-        handleCreate={handleCreate}
-        showArchived={showArchived}
-        setShowArchived={setShowArchived}
-      />
-      <ToDoListOverviewList
-        toDoListOverviewList={filteredToDoListList}
-        handleArchive={handleArchive}
-        handleDelete={handleDelete}
-      />
-    </>
+      <>
+        <Header />
+        <Toolbar
+            handleCreate={handleCreate}
+            showArchived={showArchived}
+            setShowArchived={setShowArchived}
+        />
+        <OverviewList
+            OverviewList={filteredToDoListList}
+            handleArchive={handleArchive}
+            handleDelete={handleDelete}
+        />
+      </>
   );
 }
 
