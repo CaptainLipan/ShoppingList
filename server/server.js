@@ -1,9 +1,10 @@
-require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const routes = require('./routes');
+
+require('dotenv').config();
 
 const app = express();
 const PORT = process.env.PORT || 4000;
@@ -12,15 +13,18 @@ const PORT = process.env.PORT || 4000;
 app.use(bodyParser.json());
 app.use(cors());
 
-// Connect to MongoDB
-mongoose.connect(process.env.MONGO_URI)
-    .then(() => console.log('Connected to MongoDB'))
-    .catch((err) => console.error('MongoDB connection failed:', err));
-
 // Routes
 app.use('/api', routes);
 
-// Start the server
-app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
-});
+// Connect to MongoDB
+mongoose
+    .connect(process.env.MONGO_URI)
+    .then(() => {
+        console.log('Connected to MongoDB');
+        app.listen(PORT, () => {
+            console.log(`Server running on port ${PORT}`);
+        });
+    })
+    .catch((err) => {
+        console.error('MongoDB connection failed:', err);
+    });

@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 const User = require('./models/User');
 
-mongoose.connect('mongodb://localhost:27017/Shopping_List_Database')
+mongoose.connect('mongodb+srv://klablenaj:klablenaj@shoppinlistapp.wzkzh.mongodb.net/?retryWrites=true&w=majority&appName=ShoppinListApp/test')
     .then(async () => {
         console.log("Connected to MongoDB");
 
