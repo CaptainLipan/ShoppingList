@@ -9,10 +9,13 @@ require('dotenv').config();
 const app = express();
 const PORT = process.env.PORT || 4000;
 
-// Middleware
-app.use(bodyParser.json());
-app.use(cors());
+// Middleware to parse incoming requests
+app.use(express.json());
 
+// Enable CORS for only specific origin (frontend)
+app.use(cors({
+    origin: process.env.FRONTEND_URL // Allow only requests from the specified frontend URL
+}));
 // Routes
 app.use('/api', routes);
 

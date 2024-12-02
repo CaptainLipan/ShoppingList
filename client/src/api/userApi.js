@@ -1,23 +1,51 @@
-import apiClient from './axios'; // Import the Axios instance
+import apiClient from './axios';
 
-// Fetch all users
-export const getUsers = async () => {
+// Get user with their shopping lists
+export const getUserWithLists = async (userId) => {
     try {
-        const response = await apiClient.get('/users');
-        return response.data; // Return the list of users
+        const response = await apiClient.get(`/users/${userId}`);
+        return response.data;
     } catch (error) {
-        console.error('Error fetching users:', error);
-        throw error; // Propagate the error for handling in the calling function
+        console.error("Error fetching user with lists:", error);
+        throw error;
     }
 };
 
-// (Optional) Fetch a single user by ID
-export const getUserById = async (userId) => {
+// Add user to shopping list (only creator can do this)
+export const addUserToShoppingList = async (listId, userId, loggedInUser) => {
     try {
-        const response = await apiClient.get(`/users/${userId}`);
-        return response.data; // Return user details
+        const response = await apiClient.post(`/ShoppingLists/${listId}/user/${userId}`, {
+            loggedInUser,
+        });
+        return response.data;
     } catch (error) {
-        console.error(`Error fetching user ${userId}:`, error);
+        console.error("Error adding user to shopping list:", error);
+        throw error;
+    }
+};
+
+// Remove user from shopping list (only creator can do this)
+export const removeUserFromShoppingList = async (listId, userId, loggedInUser) => {
+    try {
+        await apiClient.delete(`/ShoppingLists/${listId}/user/${userId}`, {
+            data: { loggedInUser },
+        });
+        return "User removed from shopping list.";
+    } catch (error) {
+        console.error("Error removing user from shopping list:", error);
+        throw error;
+    }
+};
+
+// User leaves shopping list
+export const leaveShoppingList = async (listId, loggedInUser) => {
+    try {
+        await apiClient.delete(`/ShoppingLists/${listId}/leave`, {
+            data: { loggedInUser },
+        });
+        return "User left the shopping list.";
+    } catch (error) {
+        console.error("Error leaving shopping list:", error);
         throw error;
     }
 };
