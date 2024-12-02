@@ -1,5 +1,5 @@
 import OverviewItem from "./OverviewItem";
-
+import '../Styles/OverviewList.css';
 function OverviewList({ OverviewList = [], handleArchive, handleDelete }) {
     if (OverviewList.length === 0) {
         return <p>No items to display</p>; // Handle empty data gracefully

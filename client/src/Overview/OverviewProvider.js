@@ -1,10 +1,10 @@
 import { useMemo, useState, useContext } from "react";
 
 import { UserContext } from "../Users/UserProvider.js";
-import Header from "./Header.js";
+import Header from "../Detail/Header.js";
 import OverviewList from "./OverviewList.js";
 import Toolbar from "./Toolbar.js";
-
+import '../Styles/OverviewProvider.css';
 function OverviewProvider() {
   const [showArchived, setShowArchived] = useState(false);
   const { loggedInUser } = useContext(UserContext);

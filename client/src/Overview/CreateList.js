@@ -1,52 +1,104 @@
-import React, { useState } from "react";
-import Modal from "react-bootstrap/Modal";
-import Button from "react-bootstrap/Button";
-import Form from "react-bootstrap/Form";
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import '../Styles/CreateList.css'; // Include styles for the page
 
-function CreateListModal({ show, onClose, onAddList }) {
-    const [listName, setListName] = useState("");
+function CreateList() {
+    const navigate = useNavigate();
 
-    // Handle form submission
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        if (listName.trim() === "") {
-            alert("List name is required!");
-            return;
+    const [listName, setListName] = useState('');
+    const [email, setEmail] = useState('');
+    const [members, setMembers] = useState([]);
+
+    const handleAddMember = () => {
+        if (email.trim() && !members.includes(email)) {
+            setMembers((prev) => [...prev, email]);
+            setEmail(''); // Clear input after adding
         }
-        onAddList({ name: listName }); // Pass the new list data to the parent
-        setListName(""); // Clear the input field
-        onClose(); // Close the modal
+    };
+
+    const handleRemoveMember = (member) => {
+        setMembers((prev) => prev.filter((m) => m !== member));
+    };
+
+    const handleCreate = () => {
+        if (listName.trim()) {
+            // Perform your save action here
+            console.log('List Created:', { listName, members });
+            navigate('/'); // Navigate back to the main page
+        } else {
+            alert('List name is required!');
+        }
     };
 
     return (
-        <Modal show={show} onHide={onClose}>
-            <Form onSubmit={handleSubmit}>
-                <Modal.Header closeButton>
-                    <Modal.Title>Create New List</Modal.Title>
-                </Modal.Header>
-                <Modal.Body>
-                    <Form.Group>
-                        <Form.Label>List Name</Form.Label>
-                        <Form.Control
-                            type="text"
-                            value={listName}
-                            onChange={(e) => setListName(e.target.value)}
-                            placeholder="Enter list name"
-                            required
-                        />
-                    </Form.Group>
-                </Modal.Body>
-                <Modal.Footer>
-                    <Button variant="secondary" onClick={onClose}>
-                        Close
-                    </Button>
-                    <Button variant="primary" type="submit">
+        <div className="create-list-container">
+            <header className="create-list-header">Create New List</header>
+            <form
+                className="create-list-form"
+                onSubmit={(e) => {
+                    e.preventDefault();
+                    handleCreate();
+                }}
+            >
+                {/* Input for List Name */}
+                <input
+                    type="text"
+                    placeholder="Enter list name"
+                    className="input-field"
+                    value={listName}
+                    onChange={(e) => setListName(e.target.value)}
+                />
+
+                {/* Section to Add Members */}
+                <div className="add-people-section">
+                    <input
+                        type="email"
+                        placeholder="Add people by Email"
+                        className="input-field"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                    />
+                    <button
+                        type="button"
+                        className="add-btn"
+                        onClick={handleAddMember}
+                    >
+                        +
+                    </button>
+                </div>
+
+                {/* List of Members */}
+                <div className="members-list">
+                    {members.map((member, index) => (
+                        <div key={index} className="member-item">
+                            {member}
+                            <button
+                                type="button"
+                                className="remove-btn"
+                                onClick={() => handleRemoveMember(member)}
+                            >
+                                ✕
+                            </button>
+                        </div>
+                    ))}
+                </div>
+
+                {/* Action Buttons */}
+                <div className="button-group">
+                    <button
+                        type="button"
+                        className="btn btn-cancel"
+                        onClick={() => navigate('/')}
+                    >
+                        Cancel
+                    </button>
+                    <button type="submit" className="btn btn-create">
                         Create
-                    </Button>
-                </Modal.Footer>
-            </Form>
-        </Modal>
+                    </button>
+                </div>
+            </form>
+        </div>
     );
 }
 
-export default CreateListModal;
+export default CreateList;

@@ -1,0 +1,71 @@
+/* OverviewProvider.css */
+
+/* Page container */
+body {
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+  }
+
+/* Header styling */
+header {
+    background-color: #007bff; /* Bootstrap primary blue */
+    color: white;
+    padding: 15px 20px;
+    text-align: center;
+    font-size: 24px;
+    font-weight: bold;
+    box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Toolbar container */
+.toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 20px;
+    background-color: white;
+    box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+    margin-bottom: 10px;
+    border-radius: 5px;
+}
+
+/* Toolbar buttons */
+.toolbar button {
+    padding: 10px 15px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.toolbar button:hover {
+    background-color: #007bff; /* Bootstrap blue */
+    color: white;
+}
+
+.toolbar .toggle-archived {
+    background-color: #6c757d; /* Bootstrap gray */
+    color: white;
+}
+
+.toolbar .toggle-archived.active {
+    background-color: #28a745; /* Bootstrap green */
+    color: white;
+}
+
+/* Overview list container */
+.overview-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+
