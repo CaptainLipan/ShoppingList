@@ -15,3 +15,13 @@ exports.getUserWithLists = async (req, res) => {
         res.status(500).json({ error: "Error fetching user." });
     }
 };
+// Controller for fetching all users
+exports.getAllUsers = async (req, res) => {
+    try {
+        const users = await User.find({}, "id name"); // Fetch all users, only return id and name fields
+        res.status(200).json(users);
+    } catch (error) {
+        console.error("Error fetching users:", error);
+        res.status(500).json({ error: "Error fetching users" });
+    }
+};

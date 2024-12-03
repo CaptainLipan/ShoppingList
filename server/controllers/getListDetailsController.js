@@ -1,14 +1,12 @@
 const List = require("../models/List");
 
 exports.getListDetails = async (req, res) => {
-    let { listId } = req.params;
+    const { listId } = req.params;
 
     try {
-        listId = listId.trim(); // Trim any extra whitespace or newlines
-
         const list = await List.findById(listId)
-            .populate("creator", "id name") // Fetch only id and name of the creator
-            .populate("members", "id name"); // Fetch only id and name of members
+            .populate("creator", "id name") // Populate the creator field with id and name
+            .populate("members", "id name"); // Populate the members field with id and name
 
         if (!list) {
             return res.status(404).json({ error: "List not found." });

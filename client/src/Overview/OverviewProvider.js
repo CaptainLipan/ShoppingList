@@ -17,31 +17,48 @@ function OverviewProvider({ children }) {
   const [showArchived, setShowArchived] = useState(false);
   const { loggedInUser } = useContext(UserContext);
 
-  // Replace mock data with state that will be populated from backend
   const [toDoListOverviewList, setToDoListOverviewList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Fetch all lists for the logged-in user on component mount
   useEffect(() => {
+    let isMounted = true; // Flag to determine if the component is still mounted
+
     const fetchLists = async () => {
       setLoading(true);
       try {
+        console.log("Fetching lists for user:", loggedInUser); // Debug log
         const userData = await getUserWithLists(loggedInUser);
-        setToDoListOverviewList(userData.shoppingLists || []); // Ensure it's an empty array if there's no data
-        setLoading(false);
+        console.log("Fetched data:", userData); // Debug log for API response
+
+        if (isMounted) {
+          if (userData && userData.shoppingLists) {
+            setToDoListOverviewList(userData.shoppingLists);
+          } else {
+            console.error("Unexpected response structure from getUserWithLists");
+          }
+          setLoading(false);
+        }
       } catch (error) {
-        setError('Error fetching lists. Please try again later.');
-        setLoading(false);
+        if (isMounted) {
+          console.error("Error fetching lists. Error message:", error);
+          setError('Error fetching lists. Please try again later.');
+          setLoading(false);
+        }
       }
     };
 
     fetchLists();
+
+    return () => {
+      isMounted = false; // Cleanup flag on component unmount
+    };
   }, [loggedInUser]);
 
   // Function to create a new list
   async function handleCreate(name) {
     try {
+      console.log("Creating new list with name:", name); // Debug log
       const newList = await createShoppingList({ name, members: [] });
       setToDoListOverviewList((current) => [...current, newList]);
     } catch (error) {
@@ -80,8 +97,7 @@ function OverviewProvider({ children }) {
 
   // Filtered lists based on the archived state and logged-in user
   const filteredToDoListList = useMemo(() => {
-    // Ensure the list is at least an empty array to avoid errors
-    return (toDoListOverviewList || []).filter((item) => {
+    return toDoListOverviewList.filter((item) => {
       const isOwnedOrMember =
           item.owner === loggedInUser || item.memberList.includes(loggedInUser);
 

@@ -1,5 +1,5 @@
 const express = require('express');
-const { getUserWithLists } = require("./controllers/userController");
+const { getUserWithLists, getAllUsers } = require("./controllers/userController");
 const { createList } = require("./controllers/listController");
 const { getListDetails } = require("./controllers/getListDetailsController");
 const { deleteList } = require("./controllers/deleteListController");
@@ -29,6 +29,9 @@ router.patch("/ShoppingLists/:listId/archive", archiveList);
 
 // Route to unarchive a shopping list
 router.patch("/ShoppingLists/:listId/unarchive", unarchiveList);
+
+// New route to get all users
+router.get("/users", getAllUsers);
 
 // Route for fetching users with their posts (lists)
 router.get("/users/:userId", getUserWithLists);

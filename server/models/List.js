@@ -1,10 +1,28 @@
 const mongoose = require("mongoose");
 
-const ListSchema = new mongoose.Schema({
-    name: { type: String, required: true },
-    creator: { type: mongoose.Schema.Types.ObjectId, ref: "User" }, // Reference to creator
-    archived: { type: Boolean, default: false }, // Field to indicate if the list is archived
-    createdAt: { type: Date, default: Date.now },
+const listSchema = new mongoose.Schema({
+    name: {
+        type: String,
+        required: true,
+    },
+    creator: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+        required: true,
+    },
+    createdAt: {
+        type: Date,
+        default: Date.now,
+    },
+    members: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+}],
+    isArchived: {
+        type: Boolean,
+        default: false,
+    },
 });
 
-module.exports = mongoose.model("List", ListSchema);
+const List = mongoose.model("List", listSchema);
+module.exports = List;

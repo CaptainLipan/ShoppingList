@@ -1,5 +1,15 @@
 import apiClient from './axios';
 
+// Function to get all users
+export const getAllUsers = async () => {
+    try {
+        const response = await apiClient.get('/users'); // Assuming this is the API endpoint to fetch all users
+        return response.data; // Return the data to be used in the context or component
+    } catch (error) {
+        console.error("Error fetching users:", error);
+        throw error; // Throw the error so it can be caught and handled in the calling component
+    }
+};
 // Get user with their shopping lists
 export const getUserWithLists = async (userId) => {
     try {

@@ -28,7 +28,7 @@ exports.archiveList = async (req, res) => {
         }
 
         // Archive the list
-        list.archived = true;
+        list.isArchived = true;
         await list.save();
 
         res.status(200).json({ message: "List archived successfully." });
@@ -65,7 +65,7 @@ exports.unarchiveList = async (req, res) => {
         }
 
         // Unarchive the list
-        list.archived = false;
+        list.isArchived = false;
         await list.save();
 
         res.status(200).json({ message: "List unarchived successfully." });
