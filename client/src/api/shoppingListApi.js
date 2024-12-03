@@ -120,3 +120,14 @@ export const markItemAsUnpurchased = async (listId, itemId) => {
         throw error;
     }
 };
+
+// Get user with their shopping lists
+export const getUserWithLists = async (userId) => {
+    try {
+        const response = await apiClient.get(`/users/${userId}`);
+        return response.data;
+    } catch (error) {
+        console.error("Error fetching user with lists:", error);
+        throw error;
+    }
+};

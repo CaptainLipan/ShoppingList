@@ -6,7 +6,7 @@ function Toolbar({ handleCreate, showArchived, setShowArchived }) {
     const handleFormSubmit = (e) => {
         e.preventDefault();
         if (newListName.trim()) {
-            handleCreate(newListName.trim());
+            handleCreate(newListName.trim()); // This now calls the create list API
             setNewListName(""); // Clear the input after submission
         }
     };

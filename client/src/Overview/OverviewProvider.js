@@ -1,78 +1,87 @@
-import { useMemo, useState, useContext } from "react";
-
+import { createContext, useMemo, useState, useContext, useEffect } from "react";
 import { UserContext } from "../Users/UserProvider.js";
 import Header from "../Detail/Header.js";
 import OverviewList from "./OverviewList.js";
 import Toolbar from "./Toolbar.js";
 import '../Styles/OverviewProvider.css';
-function OverviewProvider() {
+import {
+  getUserWithLists,
+  createShoppingList,
+  archiveShoppingList,
+  deleteShoppingList
+} from '../api/shoppingListApi'; // Import API functions
+
+export const OverviewContext = createContext();
+
+function OverviewProvider({ children }) {
   const [showArchived, setShowArchived] = useState(false);
   const { loggedInUser } = useContext(UserContext);
 
-  const [toDoListOverviewList, setToDoListOverviewList] = useState([
-    {
-      id: "td01",
-      name: "První úkolovník",
-      state: "active",
-      owner: "u1",
-      memberList: ["u2"],
-    },
-    {
-      id: "td02",
-      name: "Druhý úkolovník",
-      state: "archived",
-      owner: "u1",
-      memberList: ["u2", "u3"],
-    },
-    {
-      id: "td03",
-      name: "Třetí úkolovník",
-      state: "active",
-      owner: "u3",
-      memberList: [],
-    },
-    {
-      id: "td04",
-      name: "Čtvrtý úkolovník",
-      state: "archived",
-      owner: "u2",
-      memberList: ["u1"],
-    },
-  ]);
+  // Replace mock data with state that will be populated from backend
+  const [toDoListOverviewList, setToDoListOverviewList] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  // Fetch all lists for the logged-in user on component mount
+  useEffect(() => {
+    const fetchLists = async () => {
+      setLoading(true);
+      try {
+        const userData = await getUserWithLists(loggedInUser);
+        setToDoListOverviewList(userData.shoppingLists || []); // Ensure it's an empty array if there's no data
+        setLoading(false);
+      } catch (error) {
+        setError('Error fetching lists. Please try again later.');
+        setLoading(false);
+      }
+    };
+
+    fetchLists();
+  }, [loggedInUser]);
 
   // Function to create a new list
-  function handleCreate(name) {
-    setToDoListOverviewList((current) => [
-      ...current,
-      {
-        id: `td${Math.random().toString(36).substr(2, 9)}`, // Unique ID
-        name,
-        state: "active",
-        owner: loggedInUser,
-        memberList: [],
-      },
-    ]);
+  async function handleCreate(name) {
+    try {
+      const newList = await createShoppingList({ name, members: [] });
+      setToDoListOverviewList((current) => [...current, newList]);
+    } catch (error) {
+      console.error("Error creating list:", error);
+      setError("Error creating list. Please try again.");
+    }
   }
 
   // Function to archive a list
-  function handleArchive(dtoIn) {
-    setToDoListOverviewList((current) =>
-        current.map((item) =>
-            item.id === dtoIn.id ? { ...item, state: "archived" } : item
-        )
-    );
+  async function handleArchive(listId) {
+    try {
+      await archiveShoppingList(listId);
+      setToDoListOverviewList((current) =>
+          current.map((item) =>
+              item._id === listId ? { ...item, state: "archived" } : item
+          )
+      );
+    } catch (error) {
+      console.error("Error archiving list:", error);
+      setError("Error archiving list. Please try again.");
+    }
   }
 
   // Function to delete a list
-  function handleDelete(dtoIn) {
-    setToDoListOverviewList((current) =>
-        current.filter((item) => item.id !== dtoIn.id)
-    );
+  async function handleDelete(listId) {
+    try {
+      await deleteShoppingList(listId);
+      setToDoListOverviewList((current) =>
+          current.filter((item) => item._id !== listId)
+      );
+    } catch (error) {
+      console.error("Error deleting list:", error);
+      setError("Error deleting list. Please try again.");
+    }
   }
 
   // Filtered lists based on the archived state and logged-in user
   const filteredToDoListList = useMemo(() => {
-    return toDoListOverviewList.filter((item) => {
+    // Ensure the list is at least an empty array to avoid errors
+    return (toDoListOverviewList || []).filter((item) => {
       const isOwnedOrMember =
           item.owner === loggedInUser || item.memberList.includes(loggedInUser);
 
@@ -91,11 +100,17 @@ function OverviewProvider() {
             showArchived={showArchived}
             setShowArchived={setShowArchived}
         />
-        <OverviewList
-            OverviewList={filteredToDoListList}
-            handleArchive={handleArchive}
-            handleDelete={handleDelete}
-        />
+        {loading ? (
+            <p>Loading...</p>
+        ) : error ? (
+            <p>{error}</p>
+        ) : (
+            <OverviewList
+                OverviewList={filteredToDoListList}
+                handleArchive={handleArchive}
+                handleDelete={handleDelete}
+            />
+        )}
       </>
   );
 }

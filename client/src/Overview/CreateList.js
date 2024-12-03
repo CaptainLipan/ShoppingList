@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import '../Styles/CreateList.css'; // Include styles for the page
+import '../Styles/CreateList.css';
+import { createShoppingList } from '../api/shoppingListApi'; // Import API function
 
 function CreateList() {
     const navigate = useNavigate();
@@ -20,11 +21,17 @@ function CreateList() {
         setMembers((prev) => prev.filter((m) => m !== member));
     };
 
-    const handleCreate = () => {
+    const handleCreate = async () => {
         if (listName.trim()) {
-            // Perform your save action here
-            console.log('List Created:', { listName, members });
-            navigate('/'); // Navigate back to the main page
+            try {
+                // Call the API to create the shopping list
+                const newList = await createShoppingList({ name: listName, members });
+                console.log('List Created:', newList);
+                navigate('/'); // Navigate back to the main page
+            } catch (error) {
+                console.error("Error creating the shopping list:", error);
+                alert("An error occurred while creating the list. Please try again.");
+            }
         } else {
             alert('List name is required!');
         }
