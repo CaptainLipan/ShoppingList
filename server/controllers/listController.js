@@ -1,5 +1,6 @@
-const List = require("../models/List");
-const User = require("../models/User");
+// src/controllers/listController.js
+const List = require('../models/List');
+const User = require('../models/User');
 
 exports.createList = async (req, res) => {
     const { name, members = [], loggedInUser } = req.body;
@@ -24,7 +25,7 @@ exports.createList = async (req, res) => {
         const newList = new List({
             name,
             creator: creator._id,
-            members: memberIds, // Add members to the list
+            members: memberIds
         });
         await newList.save();
 

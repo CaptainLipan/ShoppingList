@@ -1,9 +1,10 @@
 const mongoose = require("mongoose");
 
-const UserSchema = new mongoose.Schema({
-    id: { type: String, required: true, unique: true }, // Custom user ID (e.g., "u1", "u2")
+const userSchema = new mongoose.Schema({
+    id: { type: String, required: true, unique: true },
     name: { type: String, required: true },
-    listIds: [{ type: mongoose.Schema.Types.ObjectId, ref: "List" }], // Array of references to lists
+    listIds: [{ type: mongoose.Schema.Types.ObjectId, ref: "List" }]
 });
 
-module.exports = mongoose.model("User", UserSchema);
+const User = mongoose.model("User", userSchema);
+module.exports = User;
