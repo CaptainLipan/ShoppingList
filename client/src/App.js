@@ -10,6 +10,7 @@ function App() {
     return (
         <div className="App">
             <UserProvider>
+
                 <Router>
                     <Routes>
                         {/* Overview page */}

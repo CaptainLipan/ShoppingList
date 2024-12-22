@@ -14,12 +14,19 @@ export const getAllUsers = async () => {
 export const getUserWithLists = async (userId) => {
     try {
         const response = await apiClient.get(`/users/${userId}`);
-        return response.data;
+
+        if (response.status !== 200) {
+            throw new Error(`Unexpected response status: ${response.status}`);
+        }
+
+        return response.data; // Ensure this returns the full response with `shoppingLists`
     } catch (error) {
-        console.error("Error fetching user with lists:", error);
+        console.error(`Error fetching lists for user with ID ${userId}:`, error.response?.data || error.message);
         throw error;
     }
 };
+
+
 
 // Add user to shopping list (only creator can do this)
 export const addUserToShoppingList = async (listId, userId, loggedInUser) => {

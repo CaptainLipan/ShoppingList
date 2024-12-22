@@ -1,9 +1,11 @@
 import OverviewItem from "./OverviewItem";
-import '../Styles/OverviewList.css';
+import "../Styles/OverviewList.css";
 
 function OverviewList({ OverviewList = [], handleArchive, handleDelete }) {
+    console.log("OverviewList data received:", OverviewList); // Debugging
+
     if (OverviewList.length === 0) {
-        return <p>No items to display</p>; // Handle empty data gracefully
+        return <p>No items to display</p>;
     }
 
     return (

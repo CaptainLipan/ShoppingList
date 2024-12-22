@@ -3,13 +3,13 @@ import { UserContext } from "../Users/UserProvider.js";
 import Header from "../Detail/Header.js";
 import OverviewList from "./OverviewList.js";
 import Toolbar from "./Toolbar.js";
-import '../Styles/OverviewProvider.css';
+import "../Styles/OverviewProvider.css";
 import {
   getUserWithLists,
   createShoppingList,
   archiveShoppingList,
-  deleteShoppingList
-} from '../api/shoppingListApi'; // Import API functions
+  deleteShoppingList,
+} from "../api/shoppingListApi";
 
 export const OverviewContext = createContext();
 
@@ -22,113 +22,106 @@ function OverviewProvider({ children }) {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    let isMounted = true; // Flag to determine if the component is still mounted
+    if (!loggedInUser) {
+      console.error("loggedInUser is null or undefined. Skipping fetch.");
+      setError("No user logged in. Unable to fetch lists.");
+      setToDoListOverviewList([]);
+      setLoading(false);
+      return;
+    }
 
     const fetchLists = async () => {
       setLoading(true);
       try {
-        console.log("Fetching lists for user:", loggedInUser); // Debug log
-        const userData = await getUserWithLists(loggedInUser);
-        console.log("Fetched data:", userData); // Debug log for API response
+        console.log("Fetching lists for loggedInUser:", loggedInUser);
+        const userData = await getUserWithLists(loggedInUser.id);
+        console.log("Fetched user data:", userData);
 
-        if (isMounted) {
-          if (userData && userData.shoppingLists) {
-            setToDoListOverviewList(userData.shoppingLists);
-          } else {
-            console.error("Unexpected response structure from getUserWithLists");
-          }
-          setLoading(false);
+        if (userData && Array.isArray(userData.shoppingLists)) {
+          setToDoListOverviewList(userData.shoppingLists);
+          console.log("toDoListOverviewList:", userData.shoppingLists);
+        } else {
+          throw new Error("Unexpected response structure from getUserWithLists.");
         }
       } catch (error) {
-        if (isMounted) {
-          console.error("Error fetching lists. Error message:", error);
-          setError('Error fetching lists. Please try again later.');
-          setLoading(false);
-        }
+        console.error("Error fetching lists:", error);
+        setError("Error fetching lists. Please try again later.");
+      } finally {
+        setLoading(false);
       }
     };
 
     fetchLists();
-
-    return () => {
-      isMounted = false; // Cleanup flag on component unmount
-    };
   }, [loggedInUser]);
 
-  // Function to create a new list
-  async function handleCreate(name) {
-    try {
-      console.log("Creating new list with name:", name); // Debug log
-      const newList = await createShoppingList({ name, members: [] });
-      setToDoListOverviewList((current) => [...current, newList]);
-    } catch (error) {
-      console.error("Error creating list:", error);
-      setError("Error creating list. Please try again.");
-    }
-  }
-
-  // Function to archive a list
-  async function handleArchive(listId) {
-    try {
-      await archiveShoppingList(listId);
-      setToDoListOverviewList((current) =>
-          current.map((item) =>
-              item._id === listId ? { ...item, state: "archived" } : item
-          )
-      );
-    } catch (error) {
-      console.error("Error archiving list:", error);
-      setError("Error archiving list. Please try again.");
-    }
-  }
-
-  // Function to delete a list
-  async function handleDelete(listId) {
-    try {
-      await deleteShoppingList(listId);
-      setToDoListOverviewList((current) =>
-          current.filter((item) => item._id !== listId)
-      );
-    } catch (error) {
-      console.error("Error deleting list:", error);
-      setError("Error deleting list. Please try again.");
-    }
-  }
-
-  // Filtered lists based on the archived state and logged-in user
   const filteredToDoListList = useMemo(() => {
-    return toDoListOverviewList.filter((item) => {
+    const filtered = toDoListOverviewList.filter((item) => {
+      console.log("Filtering item:", item);
+
+      // Compare using loggedInUser._id and item.creator
       const isOwnedOrMember =
-          item.owner === loggedInUser || item.memberList.includes(loggedInUser);
+          item.creator === loggedInUser._id || // Match creator with ObjectId
+          (item.members || []).includes(loggedInUser._id); // Match members with ObjectId
 
       if (showArchived) {
-        return isOwnedOrMember;
+        return isOwnedOrMember; // Include archived lists
       }
-      return isOwnedOrMember && item.state === "active";
+      return isOwnedOrMember && !item.isArchived; // Exclude archived lists
     });
+
+    console.log("FilteredToDoListList:", filtered); // Log filtered result
+    return filtered;
   }, [showArchived, toDoListOverviewList, loggedInUser]);
+
+
 
   return (
       <>
         <Header />
         <Toolbar
-            handleCreate={handleCreate}
+            handleCreate={async (name) => {
+              try {
+                const newList = await createShoppingList({ name, members: [] });
+                setToDoListOverviewList((current) => [...current, newList]);
+              } catch {
+                setError("Error creating list. Please try again.");
+              }
+            }}
             showArchived={showArchived}
             setShowArchived={setShowArchived}
         />
         {loading ? (
             <p>Loading...</p>
         ) : error ? (
-            <p>{error}</p>
+            <p className="error">{error}</p>
         ) : (
             <OverviewList
                 OverviewList={filteredToDoListList}
-                handleArchive={handleArchive}
-                handleDelete={handleDelete}
+                handleArchive={async (listId) => {
+                  try {
+                    await archiveShoppingList(listId);
+                    setToDoListOverviewList((current) =>
+                        current.map((item) =>
+                            item._id === listId ? { ...item, isArchived: true } : item
+                        )
+                    );
+                  } catch {
+                    setError("Error archiving list. Please try again.");
+                  }
+                }}
+                handleDelete={async (listId) => {
+                  try {
+                    await deleteShoppingList(listId);
+                    setToDoListOverviewList((current) =>
+                        current.filter((item) => item._id !== listId)
+                    );
+                  } catch {
+                    setError("Error deleting list. Please try again.");
+                  }
+                }}
             />
         )}
       </>
   );
 }
-
 export default OverviewProvider;
