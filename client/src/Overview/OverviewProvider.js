@@ -97,26 +97,22 @@ function OverviewProvider({ children }) {
         ) : (
             <OverviewList
                 OverviewList={filteredToDoListList}
-                handleArchive={async (listId) => {
-                  try {
-                    await archiveShoppingList(listId);
-                    setToDoListOverviewList((current) =>
-                        current.map((item) =>
-                            item._id === listId ? { ...item, isArchived: true } : item
-                        )
-                    );
-                  } catch {
-                    setError("Error archiving list. Please try again.");
-                  }
-                }}
                 handleDelete={async (listId) => {
                   try {
-                    await deleteShoppingList(listId);
+                    console.log("Attempting to delete list with ID:", listId); // Debug log
+
+                    // Call the deleteShoppingList API function with loggedInUser
+                    await deleteShoppingList(listId, loggedInUser.id);
+
+                    // Update state to remove the deleted list
                     setToDoListOverviewList((current) =>
                         current.filter((item) => item._id !== listId)
                     );
-                  } catch {
-                    setError("Error deleting list. Please try again.");
+
+                    console.log("List deleted successfully.");
+                  } catch (error) {
+                    console.error("Error deleting list:", error);
+                    setError(error.message || "Error deleting list. Please try again.");
                   }
                 }}
             />

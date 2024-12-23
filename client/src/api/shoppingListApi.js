@@ -23,15 +23,22 @@ export const getShoppingListDetails = async (listId) => {
 };
 
 // Delete a shopping list
-export const deleteShoppingList = async (listId) => {
+export const deleteShoppingList = async (listId, loggedInUser) => {
     try {
-        await apiClient.delete(`/ShoppingLists/${listId}`);
-        return "Shopping list deleted successfully.";
+        const response = await apiClient.delete(`/ShoppingLists/${listId}`, {
+            data: { loggedInUser }, // Pass loggedInUser in the body
+        });
+        console.log("Delete response:", response.data); // Log success response
+        return response.data;
     } catch (error) {
-        console.error("Error deleting shopping list:", error);
-        throw error;
+        console.error("Error deleting shopping list:", error.response || error);
+        throw new Error(
+            error.response?.data?.message || "Failed to delete the shopping list."
+        );
     }
 };
+
+
 
 // Archive a shopping list
 export const archiveShoppingList = async (listId) => {

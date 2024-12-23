@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../Styles/CreateList.css';
-import { createShoppingList } from '../api/shoppingListApi'; // Import API function
+import { createShoppingList } from '../api/shoppingListApi';
 
-function CreateList() {
+function CreateList({ loggedInUser }) {
     const navigate = useNavigate();
 
     const [listName, setListName] = useState('');
@@ -13,7 +13,7 @@ function CreateList() {
     const handleAddMember = () => {
         if (email.trim() && !members.includes(email)) {
             setMembers((prev) => [...prev, email]);
-            setEmail(''); // Clear input after adding
+            setEmail('');
         }
     };
 
@@ -24,10 +24,12 @@ function CreateList() {
     const handleCreate = async () => {
         if (listName.trim()) {
             try {
-                // Call the API to create the shopping list
-                const newList = await createShoppingList({ name: listName, members });
-                console.log('List Created:', newList);
-                navigate('/'); // Navigate back to the main page
+                const newList = await createShoppingList({
+                    name: listName,
+                    members,
+                    loggedInUser: loggedInUser.id,
+                });
+                navigate('/');
             } catch (error) {
                 console.error("Error creating the shopping list:", error);
                 alert("An error occurred while creating the list. Please try again.");
@@ -47,7 +49,6 @@ function CreateList() {
                     handleCreate();
                 }}
             >
-                {/* Input for List Name */}
                 <input
                     type="text"
                     placeholder="Enter list name"
@@ -56,7 +57,6 @@ function CreateList() {
                     onChange={(e) => setListName(e.target.value)}
                 />
 
-                {/* Section to Add Members */}
                 <div className="add-people-section">
                     <input
                         type="email"
@@ -74,7 +74,6 @@ function CreateList() {
                     </button>
                 </div>
 
-                {/* List of Members */}
                 <div className="members-list">
                     {members.map((member, index) => (
                         <div key={index} className="member-item">
@@ -90,7 +89,6 @@ function CreateList() {
                     ))}
                 </div>
 
-                {/* Action Buttons */}
                 <div className="button-group">
                     <button
                         type="button"
