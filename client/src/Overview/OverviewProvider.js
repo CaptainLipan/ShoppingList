@@ -7,7 +7,7 @@ import "../Styles/OverviewProvider.css";
 import {
   getUserWithLists,
   createShoppingList,
-  archiveShoppingList,
+  toggleArchiveShoppingList,
   deleteShoppingList,
 } from "../api/shoppingListApi";
 
@@ -73,17 +73,19 @@ function OverviewProvider({ children }) {
     return filtered;
   }, [showArchived, toDoListOverviewList, loggedInUser]);
 
-
-
   return (
       <>
         <Header />
         <Toolbar
             handleCreate={async (name) => {
               try {
-                const newList = await createShoppingList({ name, members: [] });
+                console.log("Creating new list with name:", name); // Debug log
+                const newList = await createShoppingList({ name, members: [], loggedInUser: loggedInUser.id });
+
+                console.log("Created list:", newList); // Log the response
                 setToDoListOverviewList((current) => [...current, newList]);
-              } catch {
+              } catch (error) {
+                console.error("Error creating list:", error); // Log errors
                 setError("Error creating list. Please try again.");
               }
             }}
@@ -97,6 +99,36 @@ function OverviewProvider({ children }) {
         ) : (
             <OverviewList
                 OverviewList={filteredToDoListList}
+                handleArchive={async (listId, isCurrentlyArchived) => {
+                  try {
+                    console.log("Toggling archive status for list with ID:", listId);
+
+                    // Call the API to toggle archive status
+                    const updatedList = await toggleArchiveShoppingList(
+                        listId,
+                        loggedInUser.id,
+                        !isCurrentlyArchived
+                    );
+
+                    // Update the state with the modified list
+                    setToDoListOverviewList((current) =>
+                        current.map((item) =>
+                            item._id === listId
+                                ? { ...item, isArchived: updatedList.list.isArchived }
+                                : item
+                        )
+                    );
+
+                    console.log(
+                        isCurrentlyArchived
+                            ? "List unarchived successfully."
+                            : "List archived successfully."
+                    );
+                  } catch (error) {
+                    console.error("Error toggling archive status:", error);
+                    setError("Error toggling archive status. Please try again.");
+                  }
+                }}
                 handleDelete={async (listId) => {
                   try {
                     console.log("Attempting to delete list with ID:", listId); // Debug log
@@ -112,7 +144,9 @@ function OverviewProvider({ children }) {
                     console.log("List deleted successfully.");
                   } catch (error) {
                     console.error("Error deleting list:", error);
-                    setError(error.message || "Error deleting list. Please try again.");
+                    setError(
+                        error.message || "Error deleting list. Please try again."
+                    );
                   }
                 }}
             />

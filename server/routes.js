@@ -3,7 +3,7 @@
     const { createList } = require("./controllers/listController");
     const { getListDetails } = require("./controllers/getListDetailsController");
     const { deleteList } = require("./controllers/deleteListController");
-    const { archiveList, unarchiveList } = require("./controllers/ArchiveListController");
+    const { toggleArchiveList } = require("./controllers/ArchiveListController");
     const { addItem } = require("./controllers/AddItemController");
     const { updateListName } = require("./controllers/UpdateListNameController");
     const { addUserToList } = require("./controllers/AddUserToListController");
@@ -24,11 +24,8 @@
     // Route to delete a shopping list
     router.delete("/ShoppingLists/:listId", deleteList);
 
-    // Route to archive a shopping list
-    router.patch("/ShoppingLists/:listId/archive", archiveList);
-
-    // Route to unarchive a shopping list
-    router.patch("/ShoppingLists/:listId/unarchive", unarchiveList);
+    // Route to archive-unArchive a shopping list
+    router.patch("/ShoppingLists/:listId/archive", toggleArchiveList);
 
     // New route to get all users
     router.get("/users", getAllUsers);

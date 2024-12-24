@@ -23,7 +23,9 @@ function OverviewItem({ list, handleArchive, handleDelete, loggedInUser }) {
                     <button
                         className="btn btn-danger"
                         onClick={() => {
-                            if (window.confirm("Are you sure you want to delete this list?")) {
+                            if (
+                                window.confirm("Are you sure you want to delete this list?")
+                            ) {
                                 handleDelete(list._id); // Call handleDelete only if confirmed
                             }
                         }}

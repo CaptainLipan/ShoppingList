@@ -31,7 +31,7 @@ function Header() {
     return (
         <nav className="navbar d-flex justify-content-between align-items-center px-3">
             {/* Brand Name */}
-            <div className="navbar-brand">AppName</div>
+            <div className="navbar-brand">Shopping list</div>
 
             {/* User Dropdown */}
             <div className="navbar-right position-relative">

@@ -40,25 +40,20 @@ export const deleteShoppingList = async (listId, loggedInUser) => {
 
 
 
-// Archive a shopping list
-export const archiveShoppingList = async (listId) => {
+// Archive-unArchive a shopping list
+export const toggleArchiveShoppingList = async (listId, loggedInUser, archive) => {
     try {
-        await apiClient.patch(`/ShoppingLists/${listId}/archive`);
-        return "Shopping list archived successfully.";
+        const response = await apiClient.patch(`/ShoppingLists/${listId}/archive`, {
+            loggedInUser,
+            archive, // Pass archive as true or false
+        });
+        console.log("Archive/Unarchive response:", response.data);
+        return response.data;
     } catch (error) {
-        console.error("Error archiving shopping list:", error);
-        throw error;
-    }
-};
-
-// Unarchive a shopping list
-export const unarchiveShoppingList = async (listId) => {
-    try {
-        await apiClient.patch(`/ShoppingLists/${listId}/unarchive`);
-        return "Shopping list unarchived successfully.";
-    } catch (error) {
-        console.error("Error unarchiving shopping list:", error);
-        throw error;
+        console.error("Error toggling archive status:", error.response || error);
+        throw new Error(
+            error.response?.data?.message || "Failed to toggle archive status."
+        );
     }
 };
 

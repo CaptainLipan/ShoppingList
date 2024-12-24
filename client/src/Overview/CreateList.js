@@ -24,11 +24,19 @@ function CreateList({ loggedInUser }) {
     const handleCreate = async () => {
         if (listName.trim()) {
             try {
+                console.log("Sending data to createShoppingList:", {
+                    name: listName,
+                    members,
+                    loggedInUser: loggedInUser.id,
+                }); // Debug log
+
                 const newList = await createShoppingList({
                     name: listName,
                     members,
                     loggedInUser: loggedInUser.id,
                 });
+
+                console.log("Successfully created list:", newList); // Log the result
                 navigate('/');
             } catch (error) {
                 console.error("Error creating the shopping list:", error);
