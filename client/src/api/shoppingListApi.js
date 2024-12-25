@@ -22,6 +22,7 @@ export const getShoppingListDetails = async (listId) => {
     }
 };
 
+
 // Delete a shopping list
 export const deleteShoppingList = async (listId, loggedInUser) => {
     try {

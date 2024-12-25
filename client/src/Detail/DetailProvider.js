@@ -1,105 +1,126 @@
-import { createContext, useMemo, useState } from "react";
+import React, { createContext, useState, useEffect } from "react";
+import { getShoppingListDetails } from "../api/shoppingListApi";
 
 export const DetailContext = createContext();
 
 function DetailProvider({ children }) {
   const [data, setData] = useState({
-    id: "tdl01",
-    name: "První úkolovník",
-    owner: "u1",
-    memberList: ["u2", "u3"],
-    itemList: [
-      {
-        id: "td01",
-        name: "první úkol",
-        resolved: false,
-      },
-    ],
+    memberList: [], // Ensure it's initialized to avoid undefined issues
+    itemList: [], // Ensure it's initialized to avoid undefined issues
   });
+  const [loading, setLoading] = useState(true); // Loading state
+  const [error, setError] = useState(null); // Error state
+  const [showResolved, setShowResolved] = useState(false); // Toggle resolved state visibility
 
-  const [showResolved, setShowResolved] = useState(false);
+  // Extract list ID from URL
+  const listId = window.location.pathname.split("/").pop();
 
-  const filteredData = useMemo(() => {
-    const result = { ...data };
-    if (!showResolved) {
-      result.itemList = result.itemList.filter((item) => !item.resolved);
-    }
-    return result;
-  }, [data, showResolved]);
+  useEffect(() => {
+    const fetchListDetails = async () => {
+      setLoading(true);
+      try {
+        const listDetails = await getShoppingListDetails(listId); // Fetch data from the API
+        if (!listDetails) {
+          throw new Error("List details not found");
+        }
+        // Populate `data` with the fetched details
+        setData({
+          memberList: listDetails.memberList || [], // Default to an empty array
+          itemList: listDetails.itemList || [], // Default to an empty array
+          ...listDetails,
+        });
+      } catch (err) {
+        console.error("Error fetching list details:", err);
+        setError("Failed to fetch list details. Please try again.");
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  const value = {
-    data: filteredData,
-    handlerMap: {
-      updateName: ({ name }) => {
-        setData((current) => {
-          current.name = name;
-          return { ...current };
-        });
-      },
-      addItem: () => {
-        setData((current) => {
-          current.itemList.push({
-            id: Math.random(),
-            name: "",
-            resolved: false,
-          });
-          return { ...current };
-        });
-      },
-      updateItemName: ({ id, name }) => {
-        setData((current) => {
-          const itemIndex = current.itemList.findIndex(
-            (item) => item.id === id
-          );
-          current.itemList[itemIndex] = {
-            ...current.itemList[itemIndex],
-            name,
-          };
-          return { ...current };
-        });
-      },
-      toggleResolveItem: ({ id }) => {
-        setData((current) => {
-          const itemIndex = current.itemList.findIndex(
-            (item) => item.id === id
-          );
-          current.itemList[itemIndex] = {
-            ...current.itemList[itemIndex],
-            resolved: !current.itemList[itemIndex].resolved,
-          };
-          return { ...current };
-        });
-      },
-      deleteItem: ({ id }) => {
-        setData((current) => {
-          const itemIndex = current.itemList.findIndex(
-            (item) => item.id === id
-          );
-          console.log(itemIndex);
-          current.itemList.splice(itemIndex, 1);
-          return { ...current };
-        });
-      },
-      addMember: ({ memberId }) => {
-        setData((current) => {
-          if (!current.memberList.includes(memberId))
-            current.memberList.push(memberId);
-          return { ...current };
-        });
-      },
-      removeMember: (memberId) => {
-        setData((prevData) => ({
-          ...prevData,
-          memberList: prevData.memberList.filter((id) => id !== memberId),
-        }));
-      },
+    fetchListDetails();
+  }, [listId]);
 
+  // Handlers for list actions
+  const handlerMap = {
+    addItem: async () => {
+      if (!data) return;
+      const newItem = {
+        id: Math.random().toString(), // Replace with a backend-generated ID in production
+        name: "",
+        resolved: false,
+      };
+      setData((current) => ({
+        ...current,
+        itemList: [...current.itemList, newItem],
+      }));
     },
+    updateItemName: ({ id, name }) => {
+      setData((current) => {
+        if (!current) return current;
+        return {
+          ...current,
+          itemList: current.itemList.map((item) =>
+              item.id === id ? { ...item, name } : item
+          ),
+        };
+      });
+    },
+    toggleResolveItem: ({ id }) => {
+      setData((current) => {
+        if (!current) return current;
+        return {
+          ...current,
+          itemList: current.itemList.map((item) =>
+              item.id === id ? { ...item, resolved: !item.resolved } : item
+          ),
+        };
+      });
+    },
+    deleteItem: ({ id }) => {
+      setData((current) => {
+        if (!current) return current;
+        return {
+          ...current,
+          itemList: current.itemList.filter((item) => item.id !== id),
+        };
+      });
+    },
+    addMember: ({ memberId }) => {
+      setData((current) => {
+        if (!current || current.memberList.includes(memberId)) return current;
+        return {
+          ...current,
+          memberList: [...current.memberList, memberId],
+        };
+      });
+    },
+    removeMember: ({ memberId }) => {
+      setData((current) => {
+        if (!current) return current;
+        return {
+          ...current,
+          memberList: current.memberList.filter((id) => id !== memberId),
+        };
+      });
+    },
+  };
+
+  // Context value to be shared across components
+  const contextValue = {
+    data,
+    handlerMap,
     showResolved,
     toggleShowResolved: () => setShowResolved((current) => !current),
   };
+
+  // Conditional rendering for loading and error states
+  if (loading) return <p>Loading...</p>;
+  if (error) return <p className="error">{error}</p>;
+
   return (
-    <DetailContext.Provider value={value}>{children}</DetailContext.Provider>
+      <DetailContext.Provider value={contextValue}>
+        {children}
+      </DetailContext.Provider>
   );
 }
 

@@ -1,22 +1,22 @@
-// src/providers/UserProvider.js
 import { createContext, useState, useEffect } from "react";
-import { getAllUsers, getUserWithLists } from "../api/userApi"; // Import API functions
+import { getAllUsers, getUserWithLists } from "../api/userApi";
 
 export const UserContext = createContext();
 
 function UserProvider({ children }) {
-  const [loggedInUser, setLoggedInUser] = useState(null); // Current logged-in user
-  const [userLists, setUserLists] = useState([]); // Logged-in user's shopping lists
-  const [loading, setLoading] = useState(true); // Loading state
-  const [error, setError] = useState(null); // Error state
+  const [loggedInUser, setLoggedInUser] = useState(null);
+  const [userLists, setUserLists] = useState([]);
+  const [userList, setUserList] = useState([]); // Store all users
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     const fetchInitialData = async () => {
       try {
-        // Fetch all users
-        const users = await getAllUsers();
+        const users = await getAllUsers(); // Fetch all users
         if (users.length > 0) {
-          const firstUser = users[0]; // Select the first user as logged-in user
+          setUserList(users); // Populate userList with all users
+          const firstUser = users[0];
           setLoggedInUser(firstUser);
 
           // Fetch shopping lists for the logged-in user
@@ -29,17 +29,18 @@ function UserProvider({ children }) {
         console.error("Error fetching users or shopping lists:", err);
         setError("Failed to fetch users or shopping lists.");
       } finally {
-        setLoading(false); // Stop loading state
+        setLoading(false);
       }
     };
 
     fetchInitialData();
-  }, []); // Run once on mount
+  }, []);
 
   const value = {
     loggedInUser,
     userLists,
-    setLoggedInUser, // Allow manual user switching if needed
+    userList, // Add userList to the context
+    setLoggedInUser,
   };
 
   if (loading) {
